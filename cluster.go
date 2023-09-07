@@ -3,7 +3,6 @@ package clusters
 import (
 	"fmt"
 	"math/rand"
-	"time"
 )
 
 // A Cluster which data points gravitate around
@@ -16,7 +15,7 @@ type Cluster struct {
 type Clusters []Cluster
 
 // New sets up a new set of clusters and randomly seeds their initial positions
-func New(k int, dataset Observations) (Clusters, error) {
+func New(k int, dataset Observations, seed ...uint64) (Clusters, error) {
 	var c Clusters
 	if len(dataset) == 0 || len(dataset[0].Coordinates()) == 0 {
 		return c, fmt.Errorf("there must be at least one dimension in the data set")
@@ -25,7 +24,11 @@ func New(k int, dataset Observations) (Clusters, error) {
 		return c, fmt.Errorf("k must be greater than 0")
 	}
 
-	rand.Seed(time.Now().UnixNano())
+	if len(seed) == 0 {
+		seed = []uint64{uint64(rand.Int63())}
+	}
+
+	rand := rand.New(rand.NewSource(int64(seed[0])))
 	for i := 0; i < k; i++ {
 		var p Coordinates
 		for j := 0; j < len(dataset[0].Coordinates()); j++ {
